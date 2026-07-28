@@ -1,0 +1,19 @@
+# Values for installing argo/argo-cd chart
+# helm install argocd argo/argo-cd --namespace argocd --create-namespace -f charts/argocd/values-argocd.yaml
+
+configs:
+  params:
+    # Run ArgoCD in HTTP mode - TLS termination is handled by Envoy
+    server.insecure: "true"
+
+global:
+  domain: argocd.test.com
+
+server:
+  replicas: 1
+
+repoServer:
+  replicas: 1
+
+applicationSet:
+  replicas: 1

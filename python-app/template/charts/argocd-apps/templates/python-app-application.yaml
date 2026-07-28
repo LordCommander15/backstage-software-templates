@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ .Values.pythonApp.name }}
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: {{ .Values.pythonApp.repoURL }}
+    targetRevision: {{ .Values.pythonApp.targetRevision }}
+    path: {{ .Values.pythonApp.chartPath }}
+    helm:
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: {{ .Values.pythonApp.namespace }}
+  syncPolicy:
+    automated:
+      prune: {{ .Values.pythonApp.syncPolicy.automated.prune }}
+      selfHeal: {{ .Values.pythonApp.syncPolicy.automated.selfHeal }}
+    syncOptions:
+      - CreateNamespace=true

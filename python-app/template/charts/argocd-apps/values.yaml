@@ -1,0 +1,10 @@
+pythonApp:
+  name: python-app
+  namespace: python
+  repoURL: https://github.com/LordCommander15/python-app.git
+  targetRevision: main
+  chartPath: charts/python-app
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

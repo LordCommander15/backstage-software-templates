@@ -1,0 +1,27 @@
+# Values for ARC Runner Scale Set (gha-runner-scale-set)
+# Registers self-hosted runners with the GitHub repo and runs jobs in pods
+
+# GitHub repo to register runners with
+githubConfigUrl: "https://github.com/LordCommander15/python-app"
+
+# Reference to the secret containing the GitHub PAT
+# Secret must be created manually: kubectl create secret generic arc-github-secret
+# --namespace arc-runners --from-literal=github_token=<PAT>
+githubConfigSecret: arc-github-secret
+
+# Explicit controller service account - required when controller is in a different namespace
+controllerServiceAccount:
+  namespace: arc-systems
+  name: arc-controller-gha-rs-controller
+
+# Runner scale set name - appears as runner label in GitHub Actions
+runnerScaleSetName: "kind-runner"
+
+# Min/max runner pods
+minRunners: 0
+maxRunners: 3
+
+# Docker-in-Docker mode for building images
+# The chart automatically injects the DinD sidecar and required volumes
+containerMode:
+  type: "dind"

@@ -1,0 +1,88 @@
+name: ${{values.app_name}}-cicd 
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'source/**'
+      - 'Dockerfile'
+      - 'requirements.txt'
+  workflow_dispatch:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ '${{ secrets.DOCKERHUB_USERNAME }}' }}
+          password: ${{ '${{ secrets.DOCKERHUB_TOKEN }}' }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ '${{ secrets.DOCKERHUB_USERNAME }}' }}/${{values.app_name}}:${{ '${{ github.run_id }}' }}
+
+  cd:
+    needs: ci
+    runs-on: kind-runner
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Argo CD CLI
+        run: |
+          curl -ksSL -o argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+          chmod +x argocd
+          sudo mv argocd /usr/local/bin/argocd
+          argocd version --client
+
+      - name: Update Helm image tag
+        run: |
+          pip install yq
+          yq -Yi '.image.tag = "${{ '${{ github.run_id }}' }}"' charts/${{values.app_name}}/values-${{values.app_env}}.yaml
+          grep -n 'tag:' charts/${{values.app_name}}/values-${{values.app_env}}.yaml
+
+      - name: Commit and push Helm values
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: Update ${{values.app_name}} image tag to ${{ '${{ github.run_id }}' }}
+          file_pattern: charts/${{values.app_name}}/values-${{values.app_env}}.yaml
+
+      - name: Log in to Argo CD
+        run: |
+          argocd login argocd-server.argocd.svc.cluster.local:80 \
+            --username admin \
+            --password "${{ '${{ secrets.ARGOCD_PASSWORD }}' }}" \
+            --plaintext
+
+      - name: Ensure Argo CD repo and app
+        run: |
+          repo="https://github.com/LordCommander15/${{values.app_name}}.git"
+          argocd repo list | grep -q "$repo" || argocd repo add "$repo"
+          argocd app get ${{values.app_name}} || argocd app create ${{values.app_name}} \
+            --repo "$repo" \
+            --path charts/${{values.app_name}} \
+            --dest-namespace ${{values.app_env}} \
+            --dest-server https://kubernetes.default.svc \
+            --values values-${{values.app_env}}.yaml \
+            --revision main \
+            --sync-policy manual \
+            --sync-option CreateNamespace=true
+
+      - name: Sync ${{values.app_name}}
+        run: |
+          argocd app sync ${{values.app_name}}
+          argocd app wait ${{values.app_name}} --health --sync

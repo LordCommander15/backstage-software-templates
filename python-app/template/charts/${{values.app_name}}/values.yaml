@@ -1,0 +1,46 @@
+# Application settings
+replicaCount: 1
+
+image:
+  repository: testdid15/${{values.app_name}}
+  tag: ${{values.app_name}}-${{values.app_env}}-latest
+  pullPolicy: IfNotPresent
+
+app:
+  name: ${{values.app_name}}
+  containerPort: 5000
+
+# Health probes
+livenessProbe:
+  httpGet:
+    path: /api/v1/healthz
+    port: 5000
+
+readinessProbe:
+  httpGet:
+    path: /api/v1/healthz
+    port: 5000
+
+# Container resource requests and limits
+resources:
+  requests:
+    cpu: 50m
+    memory: 50Mi
+
+# Service settings
+service:
+  name: python-service
+  type: ClusterIP
+  port: 8080
+  targetPort: 5000
+
+# Envoy HTTPRoute settings
+gateway:
+  name: my-gateway
+  namespace: envoy-gateway-system
+
+httpRoute:
+  name: ${{values.app_name}}-route
+  hostname: "${{values.app_name}}-${{values.app_env}}.test.com"
+  pathPrefix: /
+  backendServicePort: 8080

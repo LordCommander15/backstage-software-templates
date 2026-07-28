@@ -1,0 +1,15 @@
+envoyProxy:
+  name: my-custom-proxy
+  namespace: envoy-gateway-system
+  containerPort: 80
+  nodePort: 30080
+
+gatewayClass:
+  name: eg
+  controllerName: gateway.envoyproxy.io/gatewayclass-controller
+
+gateway:
+  name: my-gateway
+  namespace: envoy-gateway-system
+  port: 80
+  protocol: HTTP

@@ -1,0 +1,12 @@
+apiVersion: v2
+name: ${{values.app_name}}
+description: A Helm chart for python-app with Envoy Gateway
+type: application
+version: 0.1.0
+appVersion: "v2"
+keywords:
+  - python
+  - flask
+  - envoy
+maintainers:
+  - name: ${{values.app_name}}

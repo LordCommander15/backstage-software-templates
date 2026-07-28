@@ -1,0 +1,5 @@
+apiVersion: v2
+name: argocd
+description: HTTPRoute for ArgoCD through the shared Envoy Gateway
+type: application
+version: 0.1.0

@@ -1,0 +1,10 @@
+gateway:
+  name: my-gateway
+  namespace: envoy-gateway-system
+
+httpRoute:
+  name: argocd-route
+  hostname: "argocd.test.com"
+  pathPrefix: /
+  backendService: argocd-server
+  backendServicePort: 80
