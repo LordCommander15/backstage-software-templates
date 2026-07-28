@@ -70,7 +70,7 @@ jobs:
 
       - name: Ensure Argo CD repo and app
         run: |
-          repo="https://github.com/LordCommander15/${{values.app_name}}.git"
+          repo="https://github.com/lordcommandermv/${{values.app_name}}.git"
           argocd repo list | grep -q "$repo" || argocd repo add "$repo"
           argocd app get ${{values.app_name}} || argocd app create ${{values.app_name}} \
             --repo "$repo" \

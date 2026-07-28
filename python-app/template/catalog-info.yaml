@@ -4,7 +4,7 @@ metadata:
   name: ${{values.app_name}}
   description: Simple Python application to display time - named ${{values.app_name}}.
   annotations:
-    github.com/project-slug: LordCommander15/${{values.app_name}}
+    github.com/project-slug: lordcommandermv/${{values.app_name}}
     backstage.io/techdocs-ref: dir:.
 spec:
   type: service
